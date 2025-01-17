@@ -2,37 +2,43 @@ const mongoose = require("mongoose");
 const bcrypte = require("bcryptjs");
 const { Schema } = mongoose;
 
-const userSchema = new Schema(
+const addSortieSchema = new Schema(
   {
-    FirstName: {
+    titleFr: {
       type: String,
       required: true,
     },
-    LastName: {
+    titleEn: {
       type: String,
       required: true,
     },
-    email: {
+    descFr: {
       type: String,
       required: true,
       unique: true,
     },
-    password: {
+    descEn: {
       type: String,
       required: true,
     },
+    days: {
+      type: String,
+    },
+    localisation: {
+      type: String,
+      required: true,
+    },
+    images: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,
-    toJSON: {
-      transform(doc, ret) {
-        delete ret.password;
-        return ret;
-      },
-    },
   }
 );
 
-const User = mongoose.model("User", userSchema);
+const AddSortie = mongoose.model("AddSortie", addSortieSchema);
 
-module.exports = User;
+module.exports = AddSortie;
