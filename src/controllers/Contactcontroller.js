@@ -1,13 +1,14 @@
 const Contact = require("../models/Contact.js");
 exports.createContactMessage = async (req, res) => {
   try {
-    const { email, name, firstName, message, phonenumber } = req.body;
+    const { email, name, firstName, message, phonenumber, motif } = req.body;
     const newContact = new Contact({
       email,
       name,
       firstName,
       message,
       phonenumber,
+      motif
     });
 
     const savedContact = await newContact.save();

@@ -23,6 +23,10 @@ const ContactSchema = new Schema(
       type: String,
       required: true,
     },
+    motif: {
+      type: String,
+      
+    }
   },
   {
     timestamps: true,
