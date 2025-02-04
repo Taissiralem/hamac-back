@@ -36,45 +36,45 @@ exports.signin = async (req, res) => {
   });
 };
 
-// exports.signup = async (req, res) => {
-//   const { FirstName, LastName, email, password } = req.body;
-//   let existingUser;
-//   try {
-//     existingUser = await User.findOne({ email: email });
-//   } catch (err) {
-//     console.log(err);
-//   }
-//   if (existingUser) {
-//     return res
-//       .status(400)
-//       .json({ message: "User already exists! Login instead." });
-//   }
-//   const hashedPassword = bcrypte.hashSync(password);
-//   const user = new User({
-//     FirstName,
-//     LastName,
-//     email,
-//     password: hashedPassword,
-//   });
+exports.signup = async (req, res) => {
+  const { FirstName, LastName, email, password } = req.body;
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    console.log(err);
+  }
+  if (existingUser) {
+    return res
+      .status(400)
+      .json({ message: "User already exists! Login instead." });
+  }
+  const hashedPassword = bcrypte.hashSync(password);
+  const user = new User({
+    FirstName,
+    LastName,
+    email,
+    password: hashedPassword,
+  });
 
-//   try {
-//     await user.save();
-//     const token = jwt.sign(
-//       { id: user._id, role: user.role },
-//       process.env.JWT_SECRET_KEY
-//     );
+  try {
+    await user.save();
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET_KEY
+    );
 
-//     res.cookie("token", token, {
-//       // httpOnly: true,
-//       sameSite: "Lax",
-//       maxAge: 31536000000, // 1 year in milliseconds
-//     });
+    res.cookie("token", token, {
+      // httpOnly: true,
+      sameSite: "Lax",
+      maxAge: 31536000000, // 1 year in milliseconds
+    });
 
-//     return res
-//       .status(201)
-//       .json({ message: "Successfully Signed Up and Logged In", user, token });
-//   } catch (err) {
-//     console.log(err);
-//     return res.status(500).json({ message: "Error during signup" });
-//   }
-// };
+    return res
+      .status(201)
+      .json({ message: "Successfully Signed Up and Logged In", user, token });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Error during signup" });
+  }
+};
