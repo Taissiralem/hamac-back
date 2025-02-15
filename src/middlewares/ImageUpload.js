@@ -25,29 +25,35 @@ exports.imageUpload = (req, res, next) => {
 };
 
 exports.multipleImageUpload = (req, res, next) => {
-  upload.array("images", 10)(req, res, (err) => {
-    console.log("req.files", req.files);
+  upload.array("images", 10)(req, res, async (err) => {
     if (err instanceof multer.MulterError) {
-      return res.status(400).send("Multer error: " + err.message);
+      return res.status(400).json({ message: "Multer error: " + err.message });
     } else if (err) {
-      return res.status(500).send("Error: " + err.message);
+      return res.status(500).json({ message: "Error: " + err.message });
     }
+
     if (!req.files || req.files.length === 0) {
+      req.imageURLs = []; // Ensure `imageURLs` is always set, even when no images are uploaded.
       return next();
     }
-    const uploadedImages = [];
-    req.files.forEach((file, index, array) => {
-      cloudinary.uploader.upload(file.path, (error, result) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).send("Error uploading image to Cloudinary");
-        }
-        uploadedImages.push(result.secure_url);
-        if (uploadedImages.length === array.length) {
-          req.imageURLs = uploadedImages;
-          next();
-        }
-      });
-    });
+
+    try {
+      // Upload images to Cloudinary
+      const uploadedImages = await Promise.all(
+        req.files.map((file) =>
+          cloudinary.uploader
+            .upload(file.path)
+            .then((result) => result.secure_url)
+        )
+      );
+
+      req.imageURLs = uploadedImages; // Store uploaded image URLs in request
+      next();
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      return res
+        .status(500)
+        .json({ message: "Error uploading images to Cloudinary" });
+    }
   });
 };

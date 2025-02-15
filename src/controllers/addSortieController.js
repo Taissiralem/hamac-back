@@ -28,17 +28,44 @@ exports.createSortie = async (req, res) => {
 exports.updateSortieById = async (req, res) => {
   try {
     const { id } = req.params;
-    const images = req.imageURLs || [];
+    const {
+      titleFr,
+      titleEn,
+      descFr,
+      descEn,
+      days,
+      localisation,
+      existingImages, // Expect this as an array
+    } = req.body;
 
+    const newImages = req.imageURLs || []; // New images from middleware
+
+    // Ensure existingImages is always an array
+    const validExistingImages = Array.isArray(existingImages)
+      ? existingImages
+      : [existingImages].filter(Boolean); // Convert single string to array if necessary
+
+    // Merge existing and new images
+    const updatedImages =
+      newImages.length > 0
+        ? [...validExistingImages, ...newImages]
+        : validExistingImages;
+
+    // Update the sortie
     const updatedSortie = await AddSortie.findByIdAndUpdate(
       id,
       {
         $set: {
-          ...req.body,
-          images: [...(req.body.images || []), ...images],
+          titleFr,
+          titleEn,
+          descFr,
+          descEn,
+          days,
+          localisation,
+          images: updatedImages, // Use merged images
         },
       },
-      { new: true }
+      { new: true } // Return the updated document
     );
 
     if (!updatedSortie) {
@@ -48,7 +75,9 @@ exports.updateSortieById = async (req, res) => {
     res.status(200).json(updatedSortie);
   } catch (error) {
     console.error("Error updating sortie:", error);
-    res.status(500).json({ error: "Failed to update sortie" });
+    res
+      .status(500)
+      .json({ error: "Failed to update sortie", details: error.message });
   }
 };
 
