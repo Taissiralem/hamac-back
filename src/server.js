@@ -18,7 +18,9 @@ server.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://hamac-events.com",
+        "https://www.hamac-events.com",
       ];
+
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
