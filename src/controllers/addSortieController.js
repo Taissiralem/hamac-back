@@ -85,7 +85,7 @@ exports.updateSortieById = async (req, res) => {
 exports.getAllSorties = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const pageSize = 10;
+    const pageSize = 9;
 
     const sorties = await AddSortie.find()
       .sort({ createdAt: -1 })
@@ -95,7 +95,7 @@ exports.getAllSorties = async (req, res) => {
     const totalCount = await AddSortie.countDocuments();
     const totalPages = Math.ceil(totalCount / pageSize);
 
-    res.status(200).json({ sorties, totalPages });
+    res.status(200).json({ sorties, totalPages, currentPage: page });
   } catch (error) {
     console.error("Error fetching sorties:", error);
     res.status(500).json({ error: "Failed to fetch sorties" });
