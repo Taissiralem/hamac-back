@@ -3,7 +3,7 @@ const AddSortie = require("../models/addSortie.js");
 // Create a new sortie
 exports.createSortie = async (req, res) => {
   try {
-    const { titleFr, titleEn, descFr, descEn, days, localisation, existingImages } = req.body;
+    const { titleFr, titleEn, descFr, descEn, days, localisation, category, existingImages } = req.body;
     // Images déjà envoyées (URL) + fichiers joints à la requête
     const urls = Array.isArray(existingImages) ? existingImages : [existingImages].filter(Boolean);
     const images = [...urls, ...(req.imageURLs || [])];
@@ -15,6 +15,7 @@ exports.createSortie = async (req, res) => {
       descEn,
       days,
       localisation,
+      category,
       images,
     });
 
@@ -37,6 +38,7 @@ exports.updateSortieById = async (req, res) => {
       descEn,
       days,
       localisation,
+      category,
       existingImages, // Expect this as an array
     } = req.body;
 
@@ -64,6 +66,7 @@ exports.updateSortieById = async (req, res) => {
           descEn,
           days,
           localisation,
+          ...(category && { category }),
           images: updatedImages, // Use merged images
         },
       },
@@ -87,15 +90,21 @@ exports.updateSortieById = async (req, res) => {
 exports.getAllSorties = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const pageSize = 9;
+    // ?all=1 : tout renvoyer d'un coup (pages du site) ; sinon pagination par 9 (admin historique)
+    const pageSize = req.query.all ? 0 : 9;
 
-    const sorties = await AddSortie.find()
+    // ?category=team-building inclut les anciens programmes, qui n'ont pas de catégorie
+    const filter = {};
+    if (req.query.category === "sortie") filter.category = "sortie";
+    else if (req.query.category === "team-building") filter.category = { $ne: "sortie" };
+
+    const sorties = await AddSortie.find(filter)
       .sort({ createdAt: -1 })
-      .skip((page - 1) * pageSize)
+      .skip(pageSize ? (page - 1) * pageSize : 0)
       .limit(pageSize);
 
-    const totalCount = await AddSortie.countDocuments();
-    const totalPages = Math.ceil(totalCount / pageSize);
+    const totalCount = await AddSortie.countDocuments(filter);
+    const totalPages = pageSize ? Math.ceil(totalCount / pageSize) : 1;
 
     res.status(200).json({ sorties, totalPages, currentPage: page });
   } catch (error) {

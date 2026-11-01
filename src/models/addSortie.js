@@ -33,6 +33,12 @@ const addSortieSchema = new Schema(
         type: String,
       },
     ],
+    // Page du site où le programme apparaît (les anciens programmes n'ont pas ce champ : team building)
+    category: {
+      type: String,
+      enum: ["team-building", "sortie"],
+      default: "team-building",
+    },
   },
   {
     timestamps: true,
