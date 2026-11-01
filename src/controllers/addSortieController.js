@@ -3,8 +3,10 @@ const AddSortie = require("../models/addSortie.js");
 // Create a new sortie
 exports.createSortie = async (req, res) => {
   try {
-    const { titleFr, titleEn, descFr, descEn, days, localisation } = req.body;
-    const images = req.imageURLs || [];
+    const { titleFr, titleEn, descFr, descEn, days, localisation, existingImages } = req.body;
+    // Images déjà envoyées (URL) + fichiers joints à la requête
+    const urls = Array.isArray(existingImages) ? existingImages : [existingImages].filter(Boolean);
+    const images = [...urls, ...(req.imageURLs || [])];
 
     const newSortie = new AddSortie({
       titleFr,
