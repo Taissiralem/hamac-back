@@ -1,9 +1,10 @@
 const { Router } = require("express");
 const NewsletterController = require("../../controllers/Newslettercontroller.js");
+const { adminAuthAndRoleCheck } = require("../../middlewares/authcheck.js");
 const router = Router();
 
-router.get("/", NewsletterController.getAllNewsletters);
 router.post("/", NewsletterController.createNewsletter);
-router.get("/count", NewsletterController.getAllNewslettersCount);
-router.delete("/:id", NewsletterController.deleteNewsletter);
+router.get("/", adminAuthAndRoleCheck, NewsletterController.getAllNewsletters);
+router.get("/count", adminAuthAndRoleCheck, NewsletterController.getAllNewslettersCount);
+router.delete("/:id", adminAuthAndRoleCheck, NewsletterController.deleteNewsletter);
 module.exports = router;

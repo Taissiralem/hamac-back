@@ -9,24 +9,25 @@ exports.signin = async (req, res) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     console.log(err);
-    return new Error(err);
+    return res.status(500).json({ message: "Server error" });
   }
-  if (!existingUser) {
-    return res.status(400).json({ message: "User not found. Signup Please" });
-  }
-  const isPasswordCorrect = bcrypte.compareSync(
-    password,
-    existingUser.password
-  );
-  if (!isPasswordCorrect) {
+  // Même message dans les deux cas pour ne pas révéler quels e-mails existent
+  if (
+    !existingUser ||
+    !password ||
+    !bcrypte.compareSync(password, existingUser.password)
+  ) {
     return res.status(400).json({ message: "invalid Email / password" });
   }
-  const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY);
+  const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "7d",
+  });
 
   res.cookie("token", token, {
-    // httpOnly: true,
+    httpOnly: true,
     sameSite: "Lax",
-    maxAge: 31536000000, // 1 year in milliseconds
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
   });
 
   return res.status(200).json({
@@ -34,6 +35,19 @@ exports.signin = async (req, res) => {
     user: existingUser,
     token,
   });
+};
+
+// Utilisateur connecté (vérifie la validité du token)
+exports.me = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+    return res.status(200).json({ user });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 // exports.signup = async (req, res) => {

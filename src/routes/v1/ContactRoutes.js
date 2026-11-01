@@ -1,10 +1,12 @@
 const { Router } = require("express");
 const Contactcontroller = require("../../controllers/Contactcontroller.js");
-const {adminAuthAndRoleCheck} = require("../../middlewares/authcheck.js");
+const { adminAuthAndRoleCheck } = require("../../middlewares/authcheck.js");
 const router = Router();
 
-router.get("/",  Contactcontroller.getAllMessage);
 router.post("/create", Contactcontroller.createContactMessage);
-router.delete("/:id", Contactcontroller.deleteContact);
+router.get("/", adminAuthAndRoleCheck, Contactcontroller.getAllMessage);
+router.get("/stats", adminAuthAndRoleCheck, Contactcontroller.getContactStats);
+router.patch("/:id", adminAuthAndRoleCheck, Contactcontroller.updateContact);
+router.delete("/:id", adminAuthAndRoleCheck, Contactcontroller.deleteContact);
 
 module.exports = router;
