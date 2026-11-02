@@ -1,5 +1,10 @@
 const AddSortie = require("../models/addSortie.js");
 
+// Champs texte optionnels de la fiche programme
+const DETAIL_FIELDS = ["participants", "audienceFr", "audienceEn", "objectiveFr", "objectiveEn", "programmeFr", "programmeEn"];
+const pickDetails = (body) =>
+  Object.fromEntries(DETAIL_FIELDS.filter((k) => typeof body[k] === "string").map((k) => [k, body[k]]));
+
 // Create a new sortie
 exports.createSortie = async (req, res) => {
   try {
@@ -17,6 +22,7 @@ exports.createSortie = async (req, res) => {
       localisation,
       category,
       images,
+      ...pickDetails(req.body),
     });
 
     const savedSortie = await newSortie.save();
@@ -67,6 +73,7 @@ exports.updateSortieById = async (req, res) => {
           days,
           localisation,
           ...(category && { category }),
+          ...pickDetails(req.body),
           images: updatedImages, // Use merged images
         },
       },
