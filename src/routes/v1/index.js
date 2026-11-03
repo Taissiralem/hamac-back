@@ -9,5 +9,6 @@ router.use("/pages", require("./PageRoutes"));
 router.use("/posts", require("./PostRoutes"));
 router.use("/realisations", require("./RealisationRoutes"));
 router.use("/upload", require("./UploadRoutes"));
+router.use("/stats", require("./StatsRoutes"));
 
 module.exports = router;
